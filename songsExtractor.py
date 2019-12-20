@@ -3,6 +3,7 @@ import spotipy
 import spotipy.util as util
 import credentialManager
 
+#SECRETS ARE RETRIEVED FROM CREDENTIAL MANAGER AND CREDENTIALMANAGER.PY IS ALSO ADDED TO .GITIGNORE TO ENSURE SECURITY
 scope = 'user-library-read'
 clientId = credentialManager.SPOTIPY_CLIENT_ID
 clientSecret = credentialManager.SPOTIPY_CLIENT_SECRET
@@ -15,6 +16,7 @@ def extract_saved_songs_of_user(clientId, clientSecret, redirectURI):
         print ("Usage: {0} userName".format(sys.argv[0]))
         sys.exit()
     
+    #USER AUTHORIZATION
     token = util.prompt_for_user_token(userName, scope, client_id = clientId, client_secret = clientSecret, redirect_uri= redirectURI)
 
     if token:
