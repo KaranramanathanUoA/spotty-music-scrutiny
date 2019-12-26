@@ -28,7 +28,7 @@ def extract_saved_songs_info_from_user_library(clientId, clientSecret, redirectU
         response = sp.current_user_saved_tracks()
         savedSongsInfo = response['items']
         
-        # subsequently runs until it has read all songs in the library
+        # Subsequently runs until it has read all songs in the library
         while (len(savedSongsInfo) < response["total"]):
             response = sp.current_user_saved_tracks(offset = len(savedSongsInfo))
             savedSongsInfo.extend(response['items'])
@@ -39,6 +39,8 @@ def extract_saved_songs_info_from_user_library(clientId, clientSecret, redirectU
         sys.exit()
 
 def extract_song_details(savedSongsInfo):
+    # Extract the song name, artist name and the artist Id using the spotify API and save them in the detailsOfAllSongs 
+    # dictionary
     detailsOfAllSongs = []
     for item in savedSongsInfo:
         songDetails = {}
@@ -53,11 +55,14 @@ def extract_song_details(savedSongsInfo):
     return detailsOfAllSongs
 
 def extract_genre_of_every_song_in_user_library(savedSongsInfo, detailsOfAllSongs):
+    # Since genre information is not retrieved with the songs information, we have to make a seperate call to the 'artist'
+    # endpoint to get the genre.
     listOfArtistIds = extract_artist_ids(savedSongsInfo)
     artistInfo = extract_genres_of_all_artists(listOfArtistIds)
     matchGenreToArtist(detailsOfAllSongs, artistInfo)
 
 def extract_artist_ids(savedSongsInfo):
+    # Set is used here to retrieve all distinct artists in the user library and only get genre information for them.
     listOfArtistIds = set()
     for item in savedSongsInfo:
         track = item['track']
@@ -72,14 +77,18 @@ def extract_genres_of_all_artists(listOfArtistIds):
     sp = spotipy.Spotify(auth = token)
     for artistId in listOfArtistIds:
         artist = sp.artist(artistId)
+        # Get genre information of all distinct artists in the users library
         genres = artist['genres']
+        # Store this in a dictionary with the artist uri as the key and the genre as the values.
         artistInfo[artistId] = genres
     return artistInfo
 
 def matchGenreToArtist(detailsOfAllSongs, artistInfo):
     for song in detailsOfAllSongs:
         artistId = song['Artist Id']
+        # Lookup artistId in the artistInfo dictionary
         genres = artistInfo[artistId]
+        # Update genre for every song in a loop
         song.update({"Genre": genres})
 
 def printJsonContentsToFile(detailsOfAllSongs):
