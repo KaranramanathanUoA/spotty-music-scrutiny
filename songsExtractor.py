@@ -25,6 +25,7 @@ def extract_saved_songs_info_from_user_library(clientId, clientSecret, redirectU
     if token:
         sp = spotipy.Spotify(auth = token)
         # First run through only returns 20 songs by default, but it also retrieves total no of songs in library
+        # Refer to https://spotipy.readthedocs.io/en/latest/ for documentation of the spotipy library.
         response = sp.current_user_saved_tracks()
         savedSongsInfo = response['items']
         
@@ -76,6 +77,7 @@ def extract_genres_of_all_artists(listOfArtistIds):
     token = util.prompt_for_user_token(userName, scope, client_id = clientId, client_secret = clientSecret, redirect_uri= redirectURI)
     sp = spotipy.Spotify(auth = token)
     for artistId in listOfArtistIds:
+        # Refer to https://spotipy.readthedocs.io/en/latest/ for documentation of the spotipy library.
         artist = sp.artist(artistId)
         # Get genre information of all distinct artists in the users library
         genres = artist['genres']
@@ -92,15 +94,17 @@ def matchGenreToArtist(detailsOfAllSongs, artistInfo):
         song.update({"Genre": genres})
 
 def printJsonContentsToFile(detailsOfAllSongs):
-    pass
+    with open('songs.json', 'w') as outFile:
+        json.dump(detailsOfAllSongs, outFile, indent=4)
 
 def main():
-    startTime = datetime.now()
+    print ("Extracting song information from spotify....")
     savedSongsInfo = extract_saved_songs_info_from_user_library(clientId, clientSecret, redirectURI)
     detailsOfAllSongs = extract_song_details(savedSongsInfo)
+    print ("Extracting genre of all songs in the user's library....")
     extract_genre_of_every_song_in_user_library(savedSongsInfo, detailsOfAllSongs)
-    print (datetime.now() - startTime)
-    #print (detailsOfAllSongs)
+    print ("Printing song details in the songs.json file....")
+    printJsonContentsToFile(detailsOfAllSongs)
 
 if __name__ == "__main__":
     main()   
